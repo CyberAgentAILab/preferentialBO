@@ -1,5 +1,14 @@
 This page provides the python code for preferential Bayesian optimization (BO), which includes experiments in [[1]](https://arxiv.org/abs/2302.01513).  
-If you use this codes for research, consider citing [1].
+If you use this codes for research then please cite:
+
+```bibtex
+@article{takeno2023towards,
+  title={Towards Practical Preferential Bayesian Optimization with Skew Gaussian Processes},
+  author={Takeno, Shion and Nomura, Masahiro and Karasuyama, Masayuki},
+  journal={arXiv preprint arXiv:2302.01513},
+  year={2023}
+}
+```
 
 # Environment
 * Linux
@@ -66,8 +75,8 @@ optimizer.update(X_win=x1, X_loo=x2)
 # Reference
 [1]: [Takeno, S., Nomura, M., Karasuyama, M., Towards Practical Preferential Bayesian Optimization with Skew Gaussian Processes, arXiv:2302.01513, 2023.](https://arxiv.org/abs/2302.01513)
 
-[2]: Benavoli, A., Azzimonti, D., and Piga, D. Skew Gaussian processes for classification. Machine Learning, 109(9): 1877–1902, 2020.
+[2]: [Benavoli, A., Azzimonti, D., and Piga, D. Skew Gaussian processes for classification. Machine Learning, 109(9): 1877–1902, 2020.](https://link.springer.com/article/10.1007/s10994-020-05906-3)
 
-[3]: Benavoli, A., Azzimonti, D., and Piga, D. Preferential Bayesian optimisation with skew Gaussian processes. In Proceedings of the Genetic and Evolutionary Computation Conference Companion, pp. 1842–1850, 2021.
+[3]: [Benavoli, A., Azzimonti, D., and Piga, D. Preferential Bayesian optimisation with skew Gaussian processes. In Proceedings of the Genetic and Evolutionary Computation Conference Companion, pp. 1842–1850, 2021.](https://dl.acm.org/doi/10.1145/3449726.3463128)
 
-[4]: Benavoli, A., Azzimonti, D., and Piga, D. A unified framework for closed-form nonparametric regression, classification, preference and mixed problems with skew Gaussian processes. Machine Learning, 110(11):3095–3133, 2021.
+[4]: [Benavoli, A., Azzimonti, D., and Piga, D. A unified framework for closed-form nonparametric regression, classification, preference and mixed problems with skew Gaussian processes. Machine Learning, 110(11):3095–3133, 2021.](https://link.springer.com/article/10.1007/s10994-021-06039-x)
