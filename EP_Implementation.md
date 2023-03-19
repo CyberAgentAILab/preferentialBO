@@ -3,138 +3,165 @@ This note provides the details of the implementation of Gaussian process regress
 
 We assume that $f$ is a sample path of GP with zero mean and some stationary kernel $k: \mathcal{X} \times \mathcal{X} \rightarrow \mathbb{R}$.
 Following [2, 3], we consider that the duel is determined as follows:
+
 $$
-    \bm{x}_{i, w} \succ \bm{x}_{i, l}
+    \boldsymbol{x}\_{i, w} \succ \boldsymbol{x}\_{i, l}
     \Leftrightarrow
-    f(\bm{x}_{i, w}) + \epsilon_w > f(\bm{x}_{i, l}) + \epsilon_l,
+    f(\boldsymbol{x}\_{i, w}) + \epsilon_w > f(\boldsymbol{x}\_{i, l}) + \epsilon_l,
 $$
-where $\bm{x}_{i, w}$ and $\bm{x}_{i, l}$ are a winner and a loser of $i$-th duel, respectively, and i.i.d. additive noise $\epsilon_w$ and $\epsilon_l$ follow the normal distribution $\mathcal{N}(0, \sigma^2_{\rm noise})$.
+
+where $\boldsymbol{x}\_{i, w}$ and $\boldsymbol{x}\_{i, l}$ are a winner and a loser of $i$-th duel, respectively, and i.i.d. additive noise $\epsilon_w$ and $\epsilon_l$ follow the normal distribution $\mathcal{N}(0, \sigma^2_{\rm noise})$.
 Therefore, the training data $\mathcal{D}_t$ can be written as, 
+
 $$
-    \mathcal{D}_t = \{ \bm{x}_{i, w} \succ \bm{x}_{i, l} \}_{i=1}^t \equiv \{v_i < 0\}_{i=1}^t,
+    \mathcal{D}_t = \{ \boldsymbol{x}\_{i, w} \succ \boldsymbol{x}\_{i, l} \}\_{i=1}^t \equiv \{v_i < 0\}\_{i=1}^t,
 $$
-where $v_i \coloneqq f(\bm{x}_{i, l}) + \epsilon_l - f(\bm{x}_{i, w}) - \epsilon_w$.
-For brevity, we denote $\{v_i < 0\}_{i=1}^t$ as $\bm{v}_t < \bm{0}$, where $\bm{v}_t \coloneqq (v_1, \dots, v_t)^\top$.
+
+where $v_i = f(\boldsymbol{x}\_{i, l}) + \epsilon_l - f(\boldsymbol{x}\_{i, w}) - \epsilon_w$.
+For brevity, we denote $\{v_i < 0\}\_{i=1}^t$ as $\boldsymbol{v}_t < \boldsymbol{0}$, where $\boldsymbol{v}_t = (v_1, \dots, v_t)^\top$.
 Then, we approximate the posterior 
+
 $$
-p\left(\bm{f}_{\rm tes} \mid \bm{v}_t < \bm{0} \right) 
-    = \frac{\Pr\left(\bm{v}_t < \bm{0} \mid \bm{f}_{\rm tes}\right)  p\left(\bm{f}_{\rm tes}\right)}{\Pr(\bm{v}_t < \bm{0})},
+p\left(\boldsymbol{f}\_{\rm tes} \mid \boldsymbol{v}_t < \boldsymbol{0} \right) 
+    = \frac{\Pr\left(\boldsymbol{v}_t < \boldsymbol{0} \mid \boldsymbol{f}\_{\rm tes}\right)  p\left(\boldsymbol{f}\_{\rm tes}\right)}{\Pr(\boldsymbol{v}_t < \boldsymbol{0})},
 $$
-where $\bm{f}_{\rm tes} \coloneqq \bigl( f(\bm{x}_{1, {\rm tes}}), \dots, f(\bm{x}_{m, {\rm tes}}) \bigr)^\top \in \mathbb{R}^m$ is an output vector on arbitrary inputs.
+
+where $\boldsymbol{f}\_{\rm tes} = \bigl( f(\boldsymbol{x}\_{1, {\rm tes}}), \dots, f(\boldsymbol{x}\_{m, {\rm tes}}) \bigr)^\top \in \mathbb{R}^m$ is an output vector on arbitrary inputs.
 
 
 
-Prior work [2] apply EP to function values on the duels, i.e., $\bigl( f(\bm{x}_{1, w}), f(\bm{x}_{1, l}), \dots, f(\bm{x}_{t, w}), f(\bm{x}_{t, l}) \bigr)$.
-However, this formulation requires two-dimensional local moment matching for $\bigl( f(\bm{x}_{i, w}), f(\bm{x}_{i, l}) \bigr)$.
+Prior work [2] apply EP to function values on the duels, i.e., $\bigl( f(\boldsymbol{x}\_{1, w}), f(\boldsymbol{x}\_{1, l}), \dots, f(\boldsymbol{x}\_{t, w}), f(\boldsymbol{x}\_{t, l}) \bigr)$.
+However, this formulation requires two-dimensional local moment matching for $\bigl( f(\boldsymbol{x}\_{i, w}), f(\boldsymbol{x}\_{i, l}) \bigr)$.
 Therefore, the implementation is highly cumbersome (See Appendix A in [2]).
 
 
-Alternatively, we apply EP to $\bm{v}_t | \bm{v}_t < \bm{0}$ directly.
-Then, since $\bm{v}_t | \bm{v}_t < \bm{0}$ follows a truncated multivariate normal distribution with a simple truncation, we can implement EP using one dimensional local moment matching, which is simpler than that of [2].
+Alternatively, we apply EP to $\boldsymbol{v}_t | \boldsymbol{v}_t < \boldsymbol{0}$ directly.
+Then, since $\boldsymbol{v}_t | \boldsymbol{v}_t < \boldsymbol{0}$ follows a truncated multivariate normal distribution with a simple truncation, we can implement EP using one dimensional local moment matching, which is simpler than that of [2].
 We have referred to Appendix B.2 of [4] for the subsequent derivation, although [4] contains some mathematical typos for the update of the mean parameters, which is fixed in the following derivation.
 
 
-Let $\bm{v} \coloneqq (v_1, \dots, v_t)^\top \sim \mathcal{N}(\bm{\mu}_0, \bm{\Sigma}_0)$ and we denote a probability density function (PDF) of the normal distribution as $\mathcal{N}(\bm{v} | \bm{\mu}_0, \bm{\Sigma}_0)$.
-Then, we consider the EP approximation for the truncated normal distribution $p(\bm{v} | \bm{v} < \bm{0})$ as follows:
+Let $\boldsymbol{v} = (v_1, \dots, v_t)^\top \sim \mathcal{N}(\boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0)$ and we denote a probability density function (PDF) of the normal distribution as $\mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0)$.
+Then, we consider the EP approximation for the truncated normal distribution $p(\boldsymbol{v} | \boldsymbol{v} < \boldsymbol{0})$ as follows:
+
 $$
-\begin{aligned}
-    p(\bm{v} | \bm{v} < \bm{0}) 
-    &\propto \mathcal{N}(\bm{v} | \bm{\mu}_0, \bm{\Sigma}_0) \prod_{i=1}^t \mathbb{I}\{ v_i < 0 \} \\
-    &\approx \mathcal{N}(\bm{v} | \bm{\mu}_0, \bm{\Sigma}_0) \prod_{i=1}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}_{i}^2 ) \\
-    &= \mathcal{N}(\bm{v} | \bm{\mu}_0, \bm{\Sigma}_0) \mathcal{N}( \bm{v} | \tilde{\bm{\mu}}, \tilde{\bm{\Sigma}} ) \\
-    &\propto \mathcal{N}(\bm{v} |  \bm{\mu}, \bm{\Sigma})
-\end{aligned}
+\begin{align}
+    p(\boldsymbol{v} | \boldsymbol{v} < \boldsymbol{0}) 
+    &\propto \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1}^t \mathbb{I}\{ v_i < 0 \} \\
+    &\approx \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}\_{i}^2 ) \\
+    &= \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \mathcal{N}( \boldsymbol{v} | \tilde{\boldsymbol{\mu}}, \tilde{\boldsymbol{\Sigma}} ) \\
+    &\propto \mathcal{N}(\boldsymbol{v} |  \boldsymbol{\mu}, \boldsymbol{\Sigma})
+\end{align}
 $$
-where $\mathbb{I}\{ v_i < 0 \}$ is an indicator function, which is $1$ if $v_i < 0$ and $0$ otherwise,  $\tilde{\bm{\mu}} \in \mathbb{R}^t \coloneqq (\tilde{\mu}_1, \dots, \tilde{\mu}_t)$, $\tilde{\bm{\Sigma}} \in \mathbb{R}^{t \times t}$ is a diagonal matrix, whose $(i,i)$-th element is $\tilde{\sigma}_i^2$, and resulting mean $\bm{\mu}$ and covariance matrix $\bm{\Sigma}$ are computed as follows:
+
+where $\mathbb{I}\{ v_i < 0 \}$ is an indicator function, which is $1$ if $v_i < 0$ and $0$ otherwise,  $\tilde{\boldsymbol{\mu}} \in \mathbb{R}^t = (\tilde{\mu}_1, \dots, \tilde{\mu}_t)$, $\tilde{\boldsymbol{\Sigma}} \in \mathbb{R}^{t \times t}$ is a diagonal matrix, whose $(i,i)$-th element is $\tilde{\sigma}_i^2$, and resulting mean $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$ are computed as follows:
+
 $$
-\begin{aligned}
-    \bm{\mu} &= \bm{\Sigma} \left( \tilde{\bm{\Sigma}}^{-1} \tilde{\bm{\mu}} + \bm{\Sigma}_0^{-1} \bm{\mu} \right) ,\\
-    \bm{\Sigma} &= \left(\bm{\Sigma}_0^{-1} + \tilde{\bm{\Sigma}}^{-1} \right)^{-1}.
-\end{aligned}
+\begin{align}
+    \boldsymbol{\mu} &= \boldsymbol{\Sigma} \left( \tilde{\boldsymbol{\Sigma}}^{-1} \tilde{\boldsymbol{\mu}} + \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu} \right) ,\\
+    \boldsymbol{\Sigma} &= \left(\boldsymbol{\Sigma}_0^{-1} + \tilde{\boldsymbol{\Sigma}}^{-1} \right)^{-1}.
+\end{align}
 $$
-Then, $\tilde{\bm{\mu}}$ and $\tilde{\bm{\Sigma}}$ are iteratively refined.
-These parameters are initialized as $\tilde{\mu}_i = 0$ and $\tilde{\sigma}_{i}^2 = \infty$ for all $i$, which corresponds to $\bm{\mu} = \bm{\mu}_0$ and $\bm{\Sigma} = \bm{\Sigma}_0$.
+
+Then, $\tilde{\boldsymbol{\mu}}$ and $\tilde{\boldsymbol{\Sigma}}$ are iteratively refined.
+These parameters are initialized as $\tilde{\mu}_i = 0$ and $\tilde{\sigma}\_{i}^2 = \infty$ for all $i$, which corresponds to $\boldsymbol{\mu} = \boldsymbol{\mu}_0$ and $\boldsymbol{\Sigma} = \boldsymbol{\Sigma}_0$.
 
 
-Let us consider the update of $\tilde{\mu}_j$ and $\tilde{\sigma}_{j}^2$.
+Let us consider the update of $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$.
 First, we consider the cavity distribution
+
 $$
-\begin{aligned}
-    q_{\backslash j}(\bm{v}) 
-    &= \mathcal{N}(\bm{v} | \bm{\mu}_0, \bm{\Sigma}_0) \prod_{i=1, i \neq j}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}_{i}^2 ) \\
-    &= \mathcal{N}(\bm{v} | \bar{\bm{\mu}}_{\backslash j}, \bar{\bm{\Sigma}}_{\backslash j}),
-\end{aligned}
+\begin{align}
+    q_{\backslash j}(\boldsymbol{v}) 
+    &= \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1, i \neq j}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}\_{i}^2 ) \\
+    &= \mathcal{N}(\boldsymbol{v} | \bar{\boldsymbol{\mu}}\_{\backslash j}, \bar{\boldsymbol{\Sigma}}\_{\backslash j}),
+\end{align}
 $$
+
 where
+
 $$
-\begin{aligned}
-    \bar{\mu}_{\backslash j, j} 
-    &\coloneqq
-    \mathbb{E}_{q_{\backslash j}}[v_j] = \bar{\sigma}_{\backslash j, j}^2 \left( \mu_j / \sigma_{j}^2 - \tilde{\mu}_j / \tilde{\sigma}_{j}^2 \right) ,\\
-    \bar{\sigma}_{\backslash j, j}^2 
-    &\coloneqq 
-    \mathbb{V}_{q_{\backslash j}} [v_j] = \left( 1 / \sigma_{j}^2 - 1 / \tilde{\sigma}_{j}^2 \right)^{-1},
-\end{aligned}
+\begin{align}
+    \bar{\mu}\_{\backslash j, j} 
+    &=
+    \mathbb{E}\_{q_{\backslash j}}[v_j] = \bar{\sigma}\_{\backslash j, j}^2 \left( \mu_j / \sigma_{j}^2 - \tilde{\mu}_j / \tilde{\sigma}\_{j}^2 \right) ,\\
+    \bar{\sigma}\_{\backslash j, j}^2 
+    &= 
+    \mathbb{V}\_{q_{\backslash j}} [v_j] = \left( 1 / \sigma_{j}^2 - 1 / \tilde{\sigma}\_{j}^2 \right)^{-1},
+\end{align}
 $$
+
 where $\mathbb{E}$ and $\mathbb{V}$ are the expectation and variance with respect to the distribution in the subscript.
-Then, $\tilde{\mu}_j$ and $\tilde{\sigma}_{j}^2$ are updated by the moment matching of a truncated normal distribution 
+Then, $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$ are updated by the moment matching of a truncated normal distribution 
+
 $$
 r_j(v_j) = 
-\frac{\mathcal{N} \left( v_j | \bar{\mu}_{\backslash j, j}, \bar{\sigma}_{\backslash j, j}^2 \right) \mathbb{I}\{ v_j < 0 \}}{\Phi (\beta)},
+\frac{\mathcal{N} \left( v_j | \bar{\mu}\_{\backslash j, j}, \bar{\sigma}\_{\backslash j, j}^2 \right) \mathbb{I}\{ v_j < 0 \}}{\Phi (\beta)},
 $$ 
-where $\beta = - \bar{\mu}_{\backslash j, j} / \bar{\sigma}_{\backslash j, j}$ and $\Phi ( \cdot )$ is a cumulative distribution function of the standard normal distribution, and the approximated normal distribution
+
+where $\beta = - \bar{\mu}\_{\backslash j, j} / \bar{\sigma}\_{\backslash j, j}$ and $\Phi ( \cdot )$ is a cumulative distribution function of the standard normal distribution, and the approximated normal distribution
+
 $$
 \hat{r}_j(v_j) \propto
-\mathcal{N} \left( v_j | \bar{\mu}_{\backslash j, j}, \bar{\sigma}_{\backslash j, j}^2 \right)
-\mathcal{N} \left( v_j | \tilde{\mu}_j, \tilde{\sigma}_{j}^2 \right).
+\mathcal{N} \left( v_j | \bar{\mu}\_{\backslash j, j}, \bar{\sigma}\_{\backslash j, j}^2 \right)
+\mathcal{N} \left( v_j | \tilde{\mu}_j, \tilde{\sigma}\_{j}^2 \right).
 $$
-Specifically, we set $\tilde{\mu}_j$ and $\tilde{\sigma}_{j}^2$ using the following equations:
+
+Specifically, we set $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$ using the following equations:
+
 $$
-\begin{aligned}
-    \bar{\mu}_{\backslash j, j} + \frac{\phi(\beta)}{\Phi(\beta)} \bar{\sigma}_{\backslash j, j} 
-    = \mathbb{E}_{r_j}\bigl[v_j\bigr] 
-    &= \mathbb{E}_{\hat{r}_j} \bigl[ v_j \bigr]
-    = \mathbb{V}_{\hat{r}_j}\bigl[v_j\bigr] \left( \frac{\bar{\mu}_{\backslash j, j}}{\bar{\sigma}_{\backslash j, j}^2} + \frac{\tilde{\mu}_j}{\tilde{\sigma}_{j}^2} \right),
+\begin{align}
+    \bar{\mu}\_{\backslash j, j} + \frac{\phi(\beta)}{\Phi(\beta)} \bar{\sigma}\_{\backslash j, j} 
+    = \mathbb{E}\_{r_j}\bigl[v_j\bigr] 
+    &= \mathbb{E}\_{\hat{r}_j} \bigl[ v_j \bigr]
+    = \mathbb{V}\_{\hat{r}_j}\bigl[v_j\bigr] \left( \frac{\bar{\mu}\_{\backslash j, j}}{\bar{\sigma}\_{\backslash j, j}^2} + \frac{\tilde{\mu}_j}{\tilde{\sigma}\_{j}^2} \right),
     \\
-     \left( 1 - \frac{\beta \phi(\beta)}{\Phi(\beta)} - \left( \frac{ \phi(\beta)}{\Phi(\beta)} \right)^2 \right) \bar{\sigma}_{\backslash j, j}^2 
-    = \mathbb{V}_{r_j}\bigl[v_j\bigr] 
-    &= \mathbb{V}_{\hat{r}_j} \bigl[ v_j \bigr]
-    = \left( \frac{1}{\bar{\sigma}_{\backslash j, j}^2} + \frac{1}{\tilde{\sigma}_{j}^2} \right)^{-1},
-\end{aligned}
+     \left( 1 - \frac{\beta \phi(\beta)}{\Phi(\beta)} - \left( \frac{ \phi(\beta)}{\Phi(\beta)} \right)^2 \right) \bar{\sigma}\_{\backslash j, j}^2 
+    = \mathbb{V}\_{r_j}\bigl[v_j\bigr] 
+    &= \mathbb{V}\_{\hat{r}_j} \bigl[ v_j \bigr]
+    = \left( \frac{1}{\bar{\sigma}\_{\backslash j, j}^2} + \frac{1}{\tilde{\sigma}\_{j}^2} \right)^{-1},
+\end{align}
 $$
+
 where $\phi$ is PDF of the standard normal distribution.
 Note that the expectation and variance of the truncated normal $r_j(v_j)$ and the normal $\hat{r}_j(v_j)$ can be obtained analytically.
-Consequently, we obtain the update rule of $\tilde{\mu}_j$ and $\tilde{\sigma}_{j}^2$  as follows:
+Consequently, we obtain the update rule of $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$  as follows:
+
 $$
-\begin{aligned}
-    \tilde{\mu}_j &\leftarrow \bar{\mu}_{\backslash j, j} + \left( \beta + \frac{ \phi(\beta)}{\Phi(\beta)} \right)^{-1} \bar{\sigma}_{\backslash j, j}, \\
-    \tilde{\sigma}_{j}^2 &\leftarrow \left( \left( \frac{\beta \phi(\beta)}{\Phi(\beta)} + \left( \frac{ \phi(\beta)}{\Phi(\beta)} \right)^2 \right)^{-1} -1 \right) \bar{\sigma}_{\backslash j, j}^2 .
-\end{aligned}
+\begin{align}
+    \tilde{\mu}_j &\leftarrow \bar{\mu}\_{\backslash j, j} + \left( \beta + \frac{ \phi(\beta)}{\Phi(\beta)} \right)^{-1} \bar{\sigma}\_{\backslash j, j}, \\
+    \tilde{\sigma}\_{j}^2 &\leftarrow \left( \left( \frac{\beta \phi(\beta)}{\Phi(\beta)} + \left( \frac{ \phi(\beta)}{\Phi(\beta)} \right)^2 \right)^{-1} -1 \right) \bar{\sigma}\_{\backslash j, j}^2 .
+\end{align}
 $$
+
 This update rule is repeated until convergence for all $j=1, \dots, t$.
 
 
-The prediction of $\bm{f}_{\rm tes}$ can be performed as follows:
+The prediction of $\boldsymbol{f}\_{\rm tes}$ can be performed as follows:
+
 $$
-\begin{aligned}
-    \bm{f}_{\rm tes} | \mathcal{D}_t &\sim \mathcal{N}(\bm{\mu}_{\rm tes}, \bm{\Sigma}_{\rm tes}), \\
-    \bm{\mu}_{\rm tes} &= \bm{k}_{\bm{v}, {\rm tes}}^\top \left( \bm{\Sigma}_0 + \tilde{\bm{\Sigma}} \right)^{-1} \tilde{\bm{\mu}},\\
-    \bm{\Sigma}_{\rm tes} &= \bm{K}_{\rm tes} - \bm{k}_{\bm{v}, {\rm tes}}^\top \left( \bm{\Sigma}_0 + \tilde{\bm{\Sigma}} \right)^{-1} \bm{k}_{\bm{v}, {\rm tes}},
-\end{aligned}
+\begin{align}
+    \boldsymbol{f}\_{\rm tes} | \mathcal{D}_t &\sim \mathcal{N}(\boldsymbol{\mu}\_{\rm tes}, \boldsymbol{\Sigma}\_{\rm tes}), \\
+    \boldsymbol{\mu}\_{\rm tes} &= \boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}}^\top \left( \boldsymbol{\Sigma}_0 + \tilde{\boldsymbol{\Sigma}} \right)^{-1} \tilde{\boldsymbol{\mu}},\\
+    \boldsymbol{\Sigma}\_{\rm tes} &= \boldsymbol{K}\_{\rm tes} - \boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}}^\top \left( \boldsymbol{\Sigma}_0 + \tilde{\boldsymbol{\Sigma}} \right)^{-1} \boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}},
+\end{align}
 $$
-where $\bm{k}_{\bm{v}, {\rm tes}} \in \mathbb{R}^{t \times m}$ is a prior covariance matrix, whose $(i, j)$-th element is ${\rm Cov}\bigl(v_i, f (\bm{x}_{j, {\rm tes}}) \bigr)$, and $\bm{K}_{{\rm tes}} \in \mathbb{R}^{m \times m}$ is a kernel matrix, whose $(i, j)$-th element is $k\bigl(f (\bm{x}_{i, {\rm tes}}), f (\bm{x}_{j, {\rm tes}}) \bigr)$.
+
+where $\boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}} \in \mathbb{R}^{t \times m}$ is a prior covariance matrix, whose $(i, j)$-th element is ${\rm Cov}\bigl(v_i, f (\boldsymbol{x}\_{j, {\rm tes}}) \bigr)$, and $\boldsymbol{K}\_{{\rm tes}} \in \mathbb{R}^{m \times m}$ is a kernel matrix, whose $(i, j)$-th element is $k\bigl(f (\boldsymbol{x}\_{i, {\rm tes}}), f (\boldsymbol{x}\_{j, {\rm tes}}) \bigr)$.
+
 # Other formulation
 
 We described the EP for the truncated multivariate normal distribution.
-On the other hand, using $z_i \coloneqq f(\bm{x}_{i, l}) - f(\bm{x}_{i, w})$, we can formulate the estimation of GPR for the preferential learning as follows:
+On the other hand, using $z_i = f(\boldsymbol{x}\_{i, l}) - f(\boldsymbol{x}\_{i, w})$, we can formulate the estimation of GPR for the preferential learning as follows:
+
 $$
-\begin{aligned}
-    p(\bm{z} | \bm{v}_t < \bm{0}) 
-    &\propto \mathcal{N}(\bm{z} | \bm{\mu}_0, \bm{\Sigma}_0 - 2\sigma_{\rm noise}\bm{I}) \prod_{i=1}^t \Pr( z_i + \epsilon_l - \epsilon_w < 0 | z_i) \\
-    &= \mathcal{N}(\bm{z} | \bm{\mu}_0, \bm{\Sigma}_0 - 2\sigma_{\rm noise}\bm{I}) \prod_{i=1}^t \Phi\left( -\frac{z_i}{\sqrt{2}\sigma_{\rm noise}} \right) \\
-\end{aligned}
+\begin{align}
+    p(\boldsymbol{z} | \boldsymbol{v}_t < \boldsymbol{0}) 
+    &\propto \mathcal{N}(\boldsymbol{z} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Pr( z_i + \epsilon_l - \epsilon_w < 0 | z_i) \\
+    &= \mathcal{N}(\boldsymbol{z} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Phi\left( -\frac{z_i}{\sqrt{2}\sigma_{\rm noise}} \right) \\
+\end{align}
 $$
-where $\bm{I}$ is the identity matrix.
+
+where $\boldsymbol{I}$ is the identity matrix.
 Then, the derivation of the EP procedure is slightly changed.
 However, the derivation for this formulation is essentially same as the GP classification model [5].
 See [5] for the detailed derivation.
