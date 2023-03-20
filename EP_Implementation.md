@@ -14,11 +14,11 @@ where $\boldsymbol{x}\_{i, w}$ and $\boldsymbol{x}\_{i, l}$ are a winner and a l
 Therefore, the training data $\mathcal{D}_t$ can be written as, 
 
 $$
-    \mathcal{D}_t = \{ \boldsymbol{x}\_{i, w} \succ \boldsymbol{x}\_{i, l} \}\_{i=1}^t \equiv \{v_i < 0\}\_{i=1}^t,
+    \mathcal{D}_t = \\{ \boldsymbol{x}\_{i, w} \succ \boldsymbol{x}\_{i, l} \\}\_{i=1}^t \equiv \\{v_i < 0\\}\_{i=1}^t,
 $$
 
 where $v_i = f(\boldsymbol{x}\_{i, l}) + \epsilon_l - f(\boldsymbol{x}\_{i, w}) - \epsilon_w$.
-For brevity, we denote $\{v_i < 0\}\_{i=1}^t$ as $\boldsymbol{v}_t < \boldsymbol{0}$, where $\boldsymbol{v}_t = (v_1, \dots, v_t)^\top$.
+For brevity, we denote $\\{v_i < 0\\}\_{i=1}^t$ as $\boldsymbol{v}_t < \boldsymbol{0}$, where $\boldsymbol{v}_t = (v_1, \dots, v_t)^\top$.
 Then, we approximate the posterior 
 
 $$
@@ -46,14 +46,14 @@ Then, we consider the EP approximation for the truncated normal distribution $p(
 $$
 \begin{align}
     p(\boldsymbol{v} | \boldsymbol{v} < \boldsymbol{0}) 
-    &\propto \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1}^t \mathbb{I}\{ v_i < 0 \} \\
+    &\propto \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1}^t \mathbb{I}\\{ v_i < 0 \\} \\
     &\approx \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}\_{i}^2 ) \\
     &= \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \mathcal{N}( \boldsymbol{v} | \tilde{\boldsymbol{\mu}}, \tilde{\boldsymbol{\Sigma}} ) \\
     &\propto \mathcal{N}(\boldsymbol{v} |  \boldsymbol{\mu}, \boldsymbol{\Sigma})
 \end{align}
 $$
 
-where $\mathbb{I}\{ v_i < 0 \}$ is an indicator function, which is $1$ if $v_i < 0$ and $0$ otherwise,  $\tilde{\boldsymbol{\mu}} \in \mathbb{R}^t = (\tilde{\mu}_1, \dots, \tilde{\mu}_t)$, $\tilde{\boldsymbol{\Sigma}} \in \mathbb{R}^{t \times t}$ is a diagonal matrix, whose $(i,i)$-th element is $\tilde{\sigma}_i^2$, and resulting mean $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$ are computed as follows:
+where $\mathbb{I}\\{ v_i < 0 \\}$ is an indicator function, which is $1$ if $v_i < 0$ and $0$ otherwise,  $\tilde{\boldsymbol{\mu}} \in \mathbb{R}^t = (\tilde{\mu}_1, \dots, \tilde{\mu}_t)$, $\tilde{\boldsymbol{\Sigma}} \in \mathbb{R}^{t \times t}$ is a diagonal matrix, whose $(i,i)$-th element is $\tilde{\sigma}_i^2$, and resulting mean $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$ are computed as follows:
 
 $$
 \begin{align}
@@ -72,8 +72,9 @@ First, we consider the cavity distribution
 $$
 \begin{align}
     q_{\backslash j}(\boldsymbol{v}) 
-    &= \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1, i \neq j}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}\_{i}^2 ) \\
-    &= \mathcal{N}(\boldsymbol{v} | \bar{\boldsymbol{\mu}}\_{\backslash j}, \bar{\boldsymbol{\Sigma}}\_{\backslash j}),
+    &= \mathcal{N}(\boldsymbol{v} | \bar{\boldsymbol{\mu}}\_{\backslash j}, \bar{\boldsymbol{\Sigma}}\_{\backslash j}) \\
+    &\propto \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1, i \neq j}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}\_{i}^2 )  
+,
 \end{align}
 $$
 
@@ -91,19 +92,23 @@ $$
 $$
 
 where $\mathbb{E}$ and $\mathbb{V}$ are the expectation and variance with respect to the distribution in the subscript.
-Then, $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$ are updated by the moment matching of a truncated normal distribution 
+Then, $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$ are updated by the moment matching between a truncated normal distribution 
 
 $$
 r_j(v_j) = 
-\frac{\mathcal{N} \left( v_j | \bar{\mu}\_{\backslash j, j}, \bar{\sigma}\_{\backslash j, j}^2 \right) \mathbb{I}\{ v_j < 0 \}}{\Phi (\beta)},
+\frac{\mathcal{N} \left( v_j | \bar{\mu}\_{\backslash j, j}, \bar{\sigma}\_{\backslash j, j}^2 \right) \mathbb{I}\\{ v_j < 0 \\}}{\Phi (\beta)},
 $$ 
 
 where $\beta = - \bar{\mu}\_{\backslash j, j} / \bar{\sigma}\_{\backslash j, j}$ and $\Phi ( \cdot )$ is a cumulative distribution function of the standard normal distribution, and the approximated normal distribution
 
 $$
-\hat{r}_j(v_j) \propto
-\mathcal{N} \left( v_j | \bar{\mu}\_{\backslash j, j}, \bar{\sigma}\_{\backslash j, j}^2 \right)
-\mathcal{N} \left( v_j | \tilde{\mu}_j, \tilde{\sigma}\_{j}^2 \right).
+\begin{align}
+    \hat{r}_j(v_j) 
+    &= \mathcal{N} \left( v_j | \mathbb{E}\_{\hat{r}_j} \bigl[ v_j \bigr], \mathbb{V}\_{\hat{r}_j} \bigl[ v_j \bigr] \right) \\
+    &\propto
+    \mathcal{N} \left( v_j | \bar{\mu}\_{\backslash j, j}, \bar{\sigma}\_{\backslash j, j}^2 \right)
+    \mathcal{N} \left( v_j | \tilde{\mu}_j, \tilde{\sigma}\_{j}^2 \right).
+\end{align}
 $$
 
 Specifically, we set $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$ using the following equations:
@@ -141,23 +146,24 @@ The prediction of $\boldsymbol{f}\_{\rm tes}$ can be performed as follows:
 $$
 \begin{align}
     \boldsymbol{f}\_{\rm tes} | \mathcal{D}_t &\sim \mathcal{N}(\boldsymbol{\mu}\_{\rm tes}, \boldsymbol{\Sigma}\_{\rm tes}), \\
-    \boldsymbol{\mu}\_{\rm tes} &= \boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}}^\top \left( \boldsymbol{\Sigma}_0 + \tilde{\boldsymbol{\Sigma}} \right)^{-1} \tilde{\boldsymbol{\mu}},\\
-    \boldsymbol{\Sigma}\_{\rm tes} &= \boldsymbol{K}\_{\rm tes} - \boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}}^\top \left( \boldsymbol{\Sigma}_0 + \tilde{\boldsymbol{\Sigma}} \right)^{-1} \boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}},
+    \boldsymbol{\mu}\_{\rm tes} &= \boldsymbol{\Sigma}\_{{\rm tes}, \boldsymbol{v}} \left( \boldsymbol{\Sigma}_0 + \tilde{\boldsymbol{\Sigma}} \right)^{-1} \tilde{\boldsymbol{\mu}},\\
+    \boldsymbol{\Sigma}\_{\rm tes} &= \boldsymbol{\Sigma}\_{{\rm tes}, {\rm tes}} - \boldsymbol{\Sigma}\_{{\rm tes}, \boldsymbol{v}} \left( \boldsymbol{\Sigma}_0 + \tilde{\boldsymbol{\Sigma}} \right)^{-1} \boldsymbol{\Sigma}\_{{\rm tes}, \boldsymbol{v}}^\top,
 \end{align}
 $$
 
-where $\boldsymbol{k}\_{\boldsymbol{v}, {\rm tes}} \in \mathbb{R}^{t \times m}$ is a prior covariance matrix, whose $(i, j)$-th element is ${\rm Cov}\bigl(v_i, f (\boldsymbol{x}\_{j, {\rm tes}}) \bigr)$, and $\boldsymbol{K}\_{{\rm tes}} \in \mathbb{R}^{m \times m}$ is a kernel matrix, whose $(i, j)$-th element is $k\bigl(f (\boldsymbol{x}\_{i, {\rm tes}}), f (\boldsymbol{x}\_{j, {\rm tes}}) \bigr)$.
+where $\boldsymbol{\Sigma}\_{{\rm tes}, {\rm tes}}$ and $\boldsymbol{\Sigma}\_{{\rm tes}, \boldsymbol{v}}$ are the covariance matrices, whose definitions are shown in Proposition 3.1 in our paper [1].
+Note that $\boldsymbol{\Sigma}_0$ corresponds to $\boldsymbol{\Sigma}\_{\boldsymbol{v}, \boldsymbol{v}}$ in our paper [1].
 
 # Other formulation
 
 We described the EP for the truncated multivariate normal distribution.
-On the other hand, using $z_i = f(\boldsymbol{x}\_{i, l}) - f(\boldsymbol{x}\_{i, w})$, we can formulate the estimation of GPR for the preferential learning as follows:
+On the other hand, using $z_i = f(\boldsymbol{x}\_{i, l}) - f(\boldsymbol{x}\_{i, w})$, we can apply EP to the distribution of $\boldsymbol{z}_t = (z_1, \dots, z_t)^\top$:
 
 $$
 \begin{align}
-    p(\boldsymbol{z} | \boldsymbol{v}_t < \boldsymbol{0}) 
-    &\propto \mathcal{N}(\boldsymbol{z} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Pr( z_i + \epsilon_l - \epsilon_w < 0 | z_i) \\
-    &= \mathcal{N}(\boldsymbol{z} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Phi\left( -\frac{z_i}{\sqrt{2}\sigma_{\rm noise}} \right) \\
+    p(\boldsymbol{z}_t | \boldsymbol{v}_t < \boldsymbol{0}) 
+    &\propto \mathcal{N}(\boldsymbol{z}_t | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Pr( z_i + \epsilon_l - \epsilon_w < 0 | z_i) \\
+    &= \mathcal{N}(\boldsymbol{z}_t | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Phi\left( -\frac{z_i}{\sqrt{2}\sigma_{\rm noise}} \right) \\
 \end{align}
 $$
 
@@ -165,6 +171,7 @@ where $\boldsymbol{I}$ is the identity matrix.
 Then, the derivation of the EP procedure is slightly changed.
 However, the derivation for this formulation is essentially same as the GP classification model [5].
 See [5] for the detailed derivation.
+
 # Reference
 
 - [1]: [Takeno, S., Nomura, M., and Karasuyama, M., Towards Practical Preferential Bayesian Optimization with Skew Gaussian Processes, arXiv:2302.01513, 2023.](https://arxiv.org/abs/2302.01513) 
