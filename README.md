@@ -1,3 +1,5 @@
+## Towards Practical Preferential Bayesian Optimization with Skew Gaussian Processes (ICML2023)
+
 This page provides the python code for preferential Bayesian optimization (BO), which includes experiments in [[1]](https://arxiv.org/abs/2302.01513).  
 If you use this codes for research then please cite:
 
