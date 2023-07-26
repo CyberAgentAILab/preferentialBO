@@ -4,11 +4,15 @@ This page provides the python code for preferential Bayesian optimization (BO), 
 If you use this codes for research then please cite:
 
 ```bibtex
-@article{takeno2023towards,
-  title={Towards Practical Preferential Bayesian Optimization with Skew Gaussian Processes},
-  author={Takeno, Shion and Nomura, Masahiro and Karasuyama, Masayuki},
-  journal={arXiv preprint arXiv:2302.01513},
-  year={2023}
+@InProceedings{takeno2023towards,
+  title = 	 {Towards Practical Preferential {B}ayesian Optimization with Skew {G}aussian Processes},
+  author =       {Takeno, Shion and Nomura, Masahiro and Karasuyama, Masayuki},
+  booktitle = 	 {Proceedings of the 40th International Conference on Machine Learning},
+  pages = 	 {33516--33533},
+  year = 	 {2023},
+  volume = 	 {202},
+  series = 	 {Proceedings of Machine Learning Research},
+  publisher =    {PMLR}
 }
 ```
 
