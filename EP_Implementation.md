@@ -43,7 +43,7 @@ We have referred to Appendix B.2 of [4] for the subsequent derivation, although 
 Let $\boldsymbol{v} = (v_1, \dots, v_t)^\top \sim \mathcal{N}(\boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0)$ and we denote a probability density function (PDF) of the normal distribution as $\mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0)$.
 Then, we consider the EP approximation for the truncated normal distribution $p(\boldsymbol{v} | \boldsymbol{v} < \boldsymbol{0})$ as follows:
 
-$$
+```math
 \begin{align}
     p(\boldsymbol{v} | \boldsymbol{v} < \boldsymbol{0}) 
     &\propto \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1}^t \mathbb{I}\\{ v_i < 0 \\} \\
@@ -51,7 +51,7 @@ $$
     &= \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \mathcal{N}( \boldsymbol{v} | \tilde{\boldsymbol{\mu}}, \tilde{\boldsymbol{\Sigma}} ) \\
     &\propto \mathcal{N}(\boldsymbol{v} |  \boldsymbol{\mu}, \boldsymbol{\Sigma})
 \end{align}
-$$
+```
 
 where $\mathbb{I}\\{ v_i < 0 \\}$ is an indicator function, which is $1$ if $v_i < 0$ and $0$ otherwise,  $\tilde{\boldsymbol{\mu}} \in \mathbb{R}^t = (\tilde{\mu}_1, \dots, \tilde{\mu}_t)$, $\tilde{\boldsymbol{\Sigma}} \in \mathbb{R}^{t \times t}$ is a diagonal matrix, whose $(i,i)$-th element is $\tilde{\sigma}_i^2$, and resulting mean $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$ are computed as follows:
 
@@ -69,18 +69,18 @@ These parameters are initialized as $\tilde{\mu}_i = 0$ and $\tilde{\sigma}\_{i}
 Let us consider the update of $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$.
 First, we consider the cavity distribution
 
-$$
+```math
 \begin{align}
     q_{\backslash j}(\boldsymbol{v}) 
     &= \mathcal{N}(\boldsymbol{v} | \bar{\boldsymbol{\mu}}\_{\backslash j}, \bar{\boldsymbol{\Sigma}}\_{\backslash j}) \\
     &\propto \mathcal{N}(\boldsymbol{v} | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0) \prod_{i=1, i \neq j}^t \mathcal{N}( v_i | \tilde{\mu}_i, \tilde{\sigma}\_{i}^2 )  
 ,
 \end{align}
-$$
+```
 
 where
 
-$$
+```math
 \begin{align}
     \bar{\mu}\_{\backslash j, j} 
     &=
@@ -89,7 +89,7 @@ $$
     &= 
     \mathbb{V}\_{q_{\backslash j}} [v_j] = \left( 1 / \sigma_{j}^2 - 1 / \tilde{\sigma}\_{j}^2 \right)^{-1},
 \end{align}
-$$
+```
 
 where $\mathbb{E}$ and $\mathbb{V}$ are the expectation and variance with respect to the distribution in the subscript.
 Then, $\tilde{\mu}_j$ and $\tilde{\sigma}\_{j}^2$ are updated by the moment matching between a truncated normal distribution 
@@ -159,13 +159,13 @@ Note that $\boldsymbol{\Sigma}_0$ corresponds to $\boldsymbol{\Sigma}\_{\boldsym
 We described the EP for the truncated multivariate normal distribution.
 On the other hand, using $z_i = f(\boldsymbol{x}\_{i, l}) - f(\boldsymbol{x}\_{i, w})$, we can apply EP to the distribution of $\boldsymbol{z}_t = (z_1, \dots, z_t)^\top$:
 
-$$
+```math
 \begin{align}
     p(\boldsymbol{z}_t | \boldsymbol{v}_t < \boldsymbol{0}) 
     &\propto \mathcal{N}(\boldsymbol{z}_t | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Pr( z_i + \epsilon_l - \epsilon_w < 0 | z_i) \\
     &= \mathcal{N}(\boldsymbol{z}_t | \boldsymbol{\mu}_0, \boldsymbol{\Sigma}_0 - 2\sigma_{\rm noise}\boldsymbol{I}) \prod_{i=1}^t \Phi\left( -\frac{z_i}{\sqrt{2}\sigma_{\rm noise}} \right) \\
 \end{align}
-$$
+```
 
 where $\boldsymbol{I}$ is the identity matrix.
 Then, the derivation of the EP procedure is slightly changed.
